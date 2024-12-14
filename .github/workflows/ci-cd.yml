@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     tags:
-      - 'v*'  # Trigger the workflow on tags like v1.0, v1.1, etc.
+      - 'v*'  # Trigger the workflow on tags like v1.0, v1.1, etc
 
 jobs:
   build:
