@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04  # You can specify the Ubuntu version to avoid issues with upcoming updates
 
     steps:
     - name: Checkout code
@@ -37,10 +37,18 @@ jobs:
         username: ${{ secrets.REMOTE_USER }}
         key: ${{ secrets.REMOTE_SSH_KEY }}
         script: |
-          cd my-app
-          docker-compose pull  # Pull the latest image
-          docker-compose up -d  # Deploy the app
+          # Ensure Docker is running on the EC2 instance
+          sudo systemctl start docker
+          
+          # Pull the latest Docker image
+          cd my-app  # Make sure your app's folder is inside the EC2 instance
+          docker-compose pull  # Pull the latest image (if you're using docker-compose)
+          docker-compose up -d  # Start your app in detached mode
+
+    - name: Debug EC2_PUBLIC_IP (for validation purposes)
+      run: |
+        echo "EC2_PUBLIC_IP=${{ secrets.EC2_PUBLIC_IP }}"  # This will print the value in the logs for debugging purposes
 
     - name: Validate Deployment
       run: |
-        curl http://${{ secrets.EC2_PUBLIC_IP }}:5000/status  # Use the secret for the EC2 public IP
+        curl http://${{ secrets.EC2_PUBLIC_IP }}:5000/status  # This will use the secret dynamically
