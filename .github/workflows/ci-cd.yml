@@ -22,13 +22,17 @@ jobs:
 
     - name: Build Docker Image
       run: |
-        TAG_NAME=$(echo ${{ github.ref }} | sed 's/refs\/tags\///')  # Remove refs/tags/ prefix
+        # Extract the tag name by removing 'refs/tags/' from the GitHub ref
+        TAG_NAME=${{ github.ref }}
+        TAG_NAME=${TAG_NAME/refs\/tags\//}  # Strip off 'refs/tags/' prefix
         echo "Building Docker image with tag: $TAG_NAME"
         docker build -t alekyagandem/my-app:$TAG_NAME .
 
     - name: Push Docker Image to Docker Hub
       run: |
-        TAG_NAME=$(echo ${{ github.ref }} | sed 's/refs\/tags\///')  # Remove refs/tags/ prefix
+        # Extract the tag name again
+        TAG_NAME=${{ github.ref }}
+        TAG_NAME=${TAG_NAME/refs\/tags\//}  # Strip off 'refs/tags/' prefix
         echo "Pushing Docker image with tag: $TAG_NAME"
         docker push alekyagandem/my-app:$TAG_NAME
 
