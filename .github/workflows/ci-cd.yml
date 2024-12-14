@@ -1,7 +1,7 @@
 on:
   push:
     tags:
-      - 'v*'  # Trigger the workflow on tags that start with 'v'
+      - 'v*'  # This will trigger the workflow on tags that start with 'v'
 
 jobs:
   build:
@@ -22,7 +22,7 @@ jobs:
 
     - name: Build Docker Image
       run: |
-        # Extract the tag name by removing 'refs/tags/' from the GitHub ref
+        # Extract the tag name (removes 'refs/tags/' from github.ref)
         TAG_NAME=${{ github.ref }}
         TAG_NAME=${TAG_NAME/refs\/tags\//}  # Strip off 'refs/tags/' prefix
         echo "Building Docker image with tag: $TAG_NAME"
@@ -30,7 +30,7 @@ jobs:
 
     - name: Push Docker Image to Docker Hub
       run: |
-        # Extract the tag name again
+        # Extract the tag name again (removes 'refs/tags/' from github.ref)
         TAG_NAME=${{ github.ref }}
         TAG_NAME=${TAG_NAME/refs\/tags\//}  # Strip off 'refs/tags/' prefix
         echo "Pushing Docker image with tag: $TAG_NAME"
