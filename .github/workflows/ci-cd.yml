@@ -43,4 +43,4 @@ jobs:
 
     - name: Validate Deployment
       run: |
-        curl http://${{ secrets.EC2_PUBLIC_IP }}:5000/status  # This will use the secret dynamically
+        curl http://${{ secrets.EC2_PUBLIC_IP }}:5000/status  # Use the secret for the EC2 public IP
