@@ -3,41 +3,47 @@ name: CI/CD Pipeline
 on:
   push:
     tags:
-      - 'v*'  # This triggers the workflow when a tag starting with 'v' is pushed, e.g., v1.0, v2.0, etc.
+      - 'v*'  # Trigger the workflow on tags like v1.0, v1.1, etc.
 
 jobs:
   build:
-    runs-on: Amazon-Linux  # Use the latest Ubuntu runner
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
 
     steps:
-      # Checkout code
+      # Step 1: Checkout code from the repository
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Set up Docker Buildx
+      # Step 2: Set up Docker Buildx (optional but useful for multi-platform builds)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      # Log in to DockerHub using credentials stored in GitHub secrets
+      # Step 3: Log in to DockerHub using credentials stored in GitHub secrets
       - name: Log in to DockerHub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Build Docker Image
+      # Step 4: Build Docker Image
       - name: Build Docker Image
         run: |
-          TAG_NAME=$(echo ${{ github.ref }} | sed 's/refs\/tags\///')  # Extract the tag name
-          docker build -t alekyagandem/my-app:$TAG_NAME .  # Build Docker image with the tag
+          # Extract the tag from the GitHub reference (remove 'refs/tags/')
+          TAG_NAME=$(echo ${{ github.ref }} | sed 's/refs\/tags\///') 
+          
+          # Optional: Print the tag name for debugging
+          echo "Building Docker image with tag: $TAG_NAME"
+          
+          # Build the Docker image with the correct tag
+          docker build -t alekyagandem/my-app:$TAG_NAME .  # Use the extracted tag to build the image
 
-      # Push Docker Image to Docker Hub
+      # Step 5: Push Docker Image to Docker Hub
       - name: Push Docker Image to Docker Hub
         run: |
-          TAG_NAME=$(echo ${{ github.ref }} | sed 's/refs\/tags\///')  # Extract the tag name
-          docker push alekyagandem/my-app:$TAG_NAME  # Push the image to Docker Hub
+          # Push the Docker image to Docker Hub with the correct tag
+          docker push alekyagandem/my-app:$TAG_NAME
 
-      # SSH into EC2 and Deploy the Docker Container
+      # Step 6: SSH into EC2 and Deploy the Docker Image
       - name: SSH into EC2 and Deploy
         uses: appleboy/ssh-action@v0.1.0
         with:
@@ -49,7 +55,7 @@ jobs:
             docker-compose pull  # Pull the latest image from Docker Hub
             docker-compose up -d  # Restart the containers in detached mode
 
-      # Validate Deployment
+      # Step 7: Validate Deployment
       - name: Validate Deployment
         run: |
-          curl http://${{ secrets.EC2_PUBLIC_IP }}:5000/status  # Check if the app is running
+          curl http://${{ secrets.EC2_PUBLIC_IP }}:5000/status  # Check if the app is running and connected to DB
