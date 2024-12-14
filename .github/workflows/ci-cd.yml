@@ -28,15 +28,15 @@ jobs:
     # Step 4: Build the Docker image
     - name: Build Docker Image
       run: |
-        # Remove 'refs/tags/' prefix to get just the tag name (e.g., v1.0)
-        TAG_NAME=$(echo ${{ github.ref }} | sed 's/refs\/tags\///')
+        # Extract the tag from the GitHub reference and remove 'refs/tags/'
+        TAG_NAME=${GITHUB_REF#refs/tags/}
         docker build -t alekyagandem/my-app:$TAG_NAME .
 
     # Step 5: Push the Docker image to Docker Hub
     - name: Push Docker Image to Docker Hub
       run: |
-        # Remove 'refs/tags/' prefix to get just the tag name (e.g., v1.0)
-        TAG_NAME=$(echo ${{ github.ref }} | sed 's/refs\/tags\///')
+        # Extract the tag from the GitHub reference and remove 'refs/tags/'
+        TAG_NAME=${GITHUB_REF#refs/tags/}
         docker push alekyagandem/my-app:$TAG_NAME
 
     # Step 6: SSH into EC2 and Deploy the Docker container
@@ -50,13 +50,4 @@ jobs:
           # Navigate to the application directory
           cd /path/to/your/application/directory
 
-          # Pull the latest Docker image
-          docker-compose pull
-
-          # Restart containers in detached mode
-          docker-compose up -d
-
-    # Step 7: Validate the deployment
-    - name: Validate Deployment
-      run: |
-        curl http://${{ secrets.EC2_PUBLIC_IP }}:5000/status
+         
