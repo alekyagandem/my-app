@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
+    runs-on: Amazon-Linux  # Use the latest Ubuntu runner
 
     steps:
       # Checkout code
