@@ -41,10 +41,6 @@ jobs:
           docker-compose pull  # Pull the latest image
           docker-compose up -d  # Deploy the app
 
-    - name: Debug EC2_PUBLIC_IP
-      run: |
-        echo "EC2_PUBLIC_IP=${{ secrets.EC2_PUBLIC_IP }}"  # This will print the value in the logs for debugging purposes
-
     - name: Validate Deployment
       run: |
-        curl http://${{ secrets.EC2_PUBLI
+        curl http://${{ secrets.EC2_PUBLIC_IP }}:5000/status  # Use the secret for the EC2 public IP
