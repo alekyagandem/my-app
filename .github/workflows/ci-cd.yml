@@ -1,35 +1,35 @@
-name: CI/CD Pipeline
-
 on:
   push:
     tags:
-      - 'v*'  # This will trigger the workflow when a tag starting with 'v' is pushed
+      - 'v*'
 
 jobs:
   build:
-    runs-on: ubuntu-22.04  # You can specify the Ubuntu version to avoid issues with upcoming updates
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
+      
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
-
+      
     - name: Log in to DockerHub
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-
+        
     - name: Build Docker Image
       run: |
-        docker build -t my-app:${{ github.ref }} .
-
+        TAG_NAME=$(echo ${{ github.ref }} | sed 's/refs\/tags\///')
+        docker build -t my-app:$TAG_NAME .
+        
     - name: Push Docker Image to Docker Hub
       run: |
-        docker push my-app:${{ github.ref }}
-
+        TAG_NAME=$(echo ${{ github.ref }} | sed 's/refs\/tags\///')
+        docker push my-app:$TAG_NAME
+        
     - name: SSH into EC2 and Deploy
       uses: appleboy/ssh-action@v0.1.0
       with:
@@ -37,18 +37,10 @@ jobs:
         username: ${{ secrets.REMOTE_USER }}
         key: ${{ secrets.REMOTE_SSH_KEY }}
         script: |
-          # Ensure Docker is running on the EC2 instance
-          sudo systemctl start docker
-          
-          # Pull the latest Docker image
-          cd my-app  # Make sure your app's folder is inside the EC2 instance
-          docker-compose pull  # Pull the latest image (if you're using docker-compose)
-          docker-compose up -d  # Start your app in detached mode
-
-    - name: Debug EC2_PUBLIC_IP (for validation purposes)
-      run: |
-        echo "EC2_PUBLIC_IP=${{ secrets.EC2_PUBLIC_IP }}"  # This will print the value in the logs for debugging purposes
+          cd my-app
+          docker-compose pull
+          docker-compose up -d
 
     - name: Validate Deployment
       run: |
-        curl http://${{ secrets.EC2_PUBLIC_IP }}:5000/status  # This will use the secret dynamically
+        curl http://$EC2_PUBLIC_IP:5000/status
