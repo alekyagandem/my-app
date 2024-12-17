@@ -10,7 +10,7 @@ COPY . /app
 # Install the required Python packages
 RUN pip install --no-cache-dir flask psycopg2 boto3
 
-# Expose the port the app will run on
+# Expose the port 
 EXPOSE 5000
 
 # Command to run the app
